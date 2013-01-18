@@ -6,7 +6,7 @@
 set _ver="1.0.11.25 [%date%]"
 set _s1=/s desc "PE version patcher tool" 
 set _s1=%_s1% /s copyright "(C) 1998-2012, pavel_a"
-set _s1=%_s1% /pv "1.0.0.1-CodeProject" 
+set _s1=%_s1% /pv "1.0.0.1-Codeplex" 
 set _s2=/s private "%USERNAME%@%USERDOMAIN%"
 
 : Note: 64 is resource ID of help text, hardcoded in the program

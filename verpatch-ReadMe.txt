@@ -265,20 +265,11 @@ Known issues and TO DO's:
 
 Source code 
 ============
-The source is provided as a Visual C++ 2005 project, it can be compiled with VC 2005, 2008, 2010 Express.
+The source is provided as a Visual C++ 2008 project, it can be compiled with VC 2008, 2010, 2012 Express.
 It demonstrates use of the UpdateResource and imagehlp.dll API.
 It does not demonstrate good use of C++, coding style or anything else.
 Dependencies on VC features available only in paid versions have been removed.
 
-Verpatch does not require elevation, and may not work correctly if elevated.
-Because VC 2005 does not know about requestedExecutionLevel manifest element yet,
-we add this element manually from the file "manif.txt".
-Without this fix, Windows 7 may decide (erroneously) that verpatch should run elevated.
-Ignore VC 2005 warning about the unknown manifest element.
-After upgrade to VC 2008 or later, this fix can be removed, instead just specify AsInvoker in the project settings.
-
-
-LICENSE TERMS: CPOL (CodeProject Open License)
-http://www.codeproject.com/info/licenses.aspx
+UAC note: Verpatch does not require any administrator rights and may not work correctly if run elevated.
 
 ~~

@@ -61,19 +61,19 @@ Examples
 
 verpatch d:\foo.dll 1.2.33.44
     - sets the file version to 1.2.33.44
-	    The Original file name and Internal name strings are set to "foo.dll".
+        The Original file name and Internal name strings are set to "foo.dll".
         File foo.dll should already have a version resource (since /va not specified)
 
 verpatch d:\foo.dll 1.2.33 /high
-	- sets three higher 3 numbers of the file version. The 4th number not changed
+    - sets three higher 3 numbers of the file version. The 4th number not changed
         File foo.dll should already have a version resource.
 
 verpatch d:\foo.dll 33.44  /s comment "a comment"
-	- replaces only two last numbers of the file version and adds a comment.
+    - replaces only two last numbers of the file version and adds a comment.
         File foo.dll should already have a version resource.
 
 verpatch d:\foo.dll "33.44 special release" /pv 1.2.3.4
-	- same as previous, with additional text in the version argument.
+    - same as previous, with additional text in the version argument.
         - Product version is also specified
 
 verpatch d:\foo.dll "1.2.33.44" /va /s description "foo.dll"
@@ -82,10 +82,10 @@ verpatch d:\foo.dll "1.2.33.44" /va /s description "foo.dll"
      ( all options should be one line)
 
 verpatch d:\foo.dll /vo /xi
-	- dumps the version resource in RC format, does not update the file.
+    - dumps the version resource in RC format, does not update the file.
 
 
-	
+    
 Remarks
 =======
 
@@ -265,7 +265,8 @@ Known issues and TO DO's:
 
 Source code 
 ============
-The source is provided as a Visual C++ 2008 project, it can be compiled with VC 2008, 2010, 2012 Express.
+The source is provided as a Visual C++ 2010 project, it can be compiled with VC 2008, 2010, 2012 Express.
+(The VC 2008 compatible project is in verpatch(vs2008).sln, verpatch.vcproj files. verpatch.sln, .vcxproj are for VC++ 2010).
 It demonstrates use of the UpdateResource and imagehlp.dll API.
 It does not demonstrate good use of C++, coding style or anything else.
 Dependencies on VC features available only in paid versions have been removed.

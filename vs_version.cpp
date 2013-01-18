@@ -71,8 +71,22 @@ BOOL makeVersionResource( __in file_ver_data_s const * fvd, __out PUCHAR *retp )
 		vbuf.pushstr( temps );
 
 		// File version as string. Not shown by Vista, Win7.
-		hr = ::StringCbPrintfW( &temps[0], sizeof(temps), L"%d.%d.%d.%d",
-			fvd->v_1, fvd->v_2, fvd->v_3, fvd->v_4 );
+        switch ( fvd->nFileVerParts ) {
+            case 1:
+                hr = ::StringCbPrintfW( &temps[0], sizeof(temps), L"%u", fvd->v_1 );
+                break;
+            case 2:
+                hr = ::StringCbPrintfW( &temps[0], sizeof(temps), L"%u.%u", fvd->v_1, fvd->v_2 );
+                break;
+            case 3:
+                hr = ::StringCbPrintfW( &temps[0], sizeof(temps), L"%u.%u.%u",
+                    fvd->v_1, fvd->v_2, fvd->v_3 );
+                break;
+            default:
+		        hr = ::StringCbPrintfW( &temps[0], sizeof(temps), L"%u.%u.%u.%u",
+			        fvd->v_1, fvd->v_2, fvd->v_3, fvd->v_4 );
+        }
+
 		if ( !SUCCEEDED(hr) ) temps[0] = 0;
         
 		if ( fvd->sFileVerTail ) {
@@ -85,8 +99,22 @@ BOOL makeVersionResource( __in file_ver_data_s const * fvd, __out PUCHAR *retp )
 		}
 		vbuf.pushTwostr( L"FileVersion", &temps[0] );
 
-		hr = ::StringCbPrintfW( &temps[0], sizeof(temps), L"%d.%d.%d.%d",
-			fvd->pv_1, fvd->pv_2, fvd->pv_3, fvd->pv_4 );
+        switch ( fvd->nProductVerParts ) {
+            case 1:
+                hr = ::StringCbPrintfW( &temps[0], sizeof(temps), L"%u", fvd->pv_1 );
+                break;
+            case 2:
+                hr = ::StringCbPrintfW( &temps[0], sizeof(temps), L"%u.%u", fvd->pv_1, fvd->pv_2 );
+                break;
+            case 3:
+                hr = ::StringCbPrintfW( &temps[0], sizeof(temps), L"%u.%u.%u",
+                    fvd->pv_1, fvd->pv_2, fvd->pv_3, fvd->pv_4 );
+                break;
+            default:
+		        hr = ::StringCbPrintfW( &temps[0], sizeof(temps), L"%u.%u.%u.%u",
+			        fvd->pv_1, fvd->pv_2, fvd->pv_3, fvd->pv_4 );
+        }
+
 		if ( !SUCCEEDED(hr) ) temps[0] = 0;
 		if ( fvd->sProductVerTail ) {
             if ( fvd->cProductVerTailSeparator ) {
@@ -213,7 +241,7 @@ BOOL ParseBinaryVersionResource(
 	// String File Info
 	PWORD stringStart = vbuf.marksize();
 	vbuf.chkword(0); //wValueLength
-	vbuf.chkword(1); //wType
+	vbuf.chkword_opt(1); //wType
 
 	try {
 		vbuf.chkstr(L"StringFileInfo");
@@ -228,13 +256,13 @@ BOOL ParseBinaryVersionResource(
 		// Retry:
 		stringStart = vbuf.marksize();
 		vbuf.chkword(0); //wValueLength
-		vbuf.chkword(1); //wType
+		vbuf.chkword_opt(1); //wType
 		vbuf.chkstr(L"StringFileInfo");
 	}
 
 	PWORD stringTableStart = vbuf.marksize();
 	vbuf.chkword(0); // ?
-	vbuf.chkword(1); //wType
+	vbuf.chkword_opt(1); //wType
 
 	// Language string: ex. "040904B0"
 	vbuf.checkspace( 10 * sizeof(WCHAR) );

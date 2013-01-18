@@ -1,9 +1,9 @@
-verpatch r9 (2011-11-21)
+verpatch 1.0.11.25 (2012)
 Usage: verpatch filename [version] [/options]
 Options:
- /va - create the version resource (use when the file has no version info, or to replace it)
+ /va - create the version resource. Use when the file has no version info.
  /s name "value" - add or replace any version resource string.
-                   name: standard or custom attribute name. See readme.txt for reference.
+                   name: standard or custom attribute name. See below.
  /pv <version> - specify Product version
            /prodver, /productversion - same as /pv
  /fn - preserve Original Filename, Internal Name in the file version info
@@ -15,10 +15,17 @@ Options:
  /noed - discard any extra data attached at the end of file
  /sc "comment" - same as /s comment "comment"
  /langid <number> - language id for new version resource; use with /va. Default=LN.
+ /high - interpret less than 4 version parts as higher numbers
 
 Examples:
   verpatch d:\foo.exe /va 1.2.3.4 /s desc "my program"
   verpatch d:\foo.dll 1.2.33.44 /s comment "fixed this and that"
   verpatch d:\foo.dll "33.44 release"
-  verpatch d:\foo.dll "1.2.33.44-beta5"
-  verpatch d:\foo.exe 1.2.3.4 /rf #9 embedded-dll.dll
+  verpatch d:\foo.dll /high 1.2.33-beta5
+  verpatch d:\foo.exe 1.2.3.4 /rf #9 embedded.dll
+
+Alternative attribute names to use with /s (see documentation for details):
+  comment company description|desc InternalName|title
+  copyright|(c) LegalTrademarks|tm|(tm) ProductName|product
+  productversion|productver|prodver|pv
+  PrivateBuild|private|pb  SpecialBuild|build|sb

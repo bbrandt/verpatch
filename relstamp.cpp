@@ -14,11 +14,12 @@ struct cmd_params {
 	bool DbgImportOnly;				// debug: test import only, don't modify file
 	bool DbgLoopbackTest;			// reparse generated blob
 	// For import & patch mode
-	bool DumpImportVerAsRC;			// dump input version info in RC format
+	bool DumpImportVerAsRC;			// dump imported version info in RC format
 	bool PreserveOriginalFilename;	// false: set to actual filename
 	bool PreserveInternalFilename;	// false: set to actual filename
 	bool PreserveStringVersionTail; // true: save appendix of fileversion, productversion strings
 	LANGID LangId;                  // language id for creation of new ver. resource. Default=0 (LN)
+	bool fHighMode;                 // If < 4 parts in version param, these are high parts (for SemVer)
 
 	bool fClearPdbPath;
 	bool fNoPreserveExtraAppendedData;	// true = do not check for extra data appended to end of file
@@ -235,74 +236,116 @@ BOOL fillFileInfo( __out file_ver_data_s *fvd, PCTSTR fpath )
 
 BOOL parseFileVer( __out file_ver_data_s *fvd, PCTSTR arg )
 {
-	unsigned n1=0,n2=0,n3=0,n4=0;
-	int nf = _stscanf_s( arg, _T("%d.%d.%d.%d"), &n1, &n2, &n3, &n4);
+	unsigned n1=0, n2=0, n3=0, n4=0;
+	int nf = _stscanf_s( arg, _T("%u.%u.%u.%u"), &n1, &n2, &n3, &n4);
 
-	// if less than 4 numbers given, they are minor
-	switch( nf ) {
-		case 1:
-			fvd->v_4 = n1;
-			break;
-		case 2:
-			fvd->v_3 = n1; fvd->v_4 = n2;
-			break;
-		case 3:
-			fvd->v_2 = n1; fvd->v_3 = n2; fvd->v_4 = n3; 
-			break;
-		case 4:
-			fvd->v_1 = n1; fvd->v_2 = n2; fvd->v_3 = n3; fvd->v_4 = n4;
-			break;
-		default:
-			dprint("error parsing version arg\n");
-			return FALSE;
-	}
+    if ( (0 >= nf) || (4 < nf) ) {
+        dprint("error parsing version arg\n");
+        return FALSE;
+    }
 
-	// Optional tail: "1.2.3.4 tail"
-	// If no tail found, don't replace existing.
-    size_t n = _tcscspn(arg, _T(" -"));
+    if ( 4 == nf ) {
+        fvd->v_1 = n1; fvd->v_2 = n2; fvd->v_3 = n3; fvd->v_4 = n4;
+    } else if ( g_params.fHighMode ) {
+        switch( nf ) {
+            case 1:
+                fvd->v_1 = n1;
+                break;
+            case 2:
+                fvd->v_1 = n1; fvd->v_2 = n2;
+                break;
+            case 3:
+                fvd->v_1 = n1; fvd->v_2 = n2; fvd->v_3 = n3; 
+                break;
+        }
+    } else {
+        // if less than 4 numbers given, they are minor
+	    switch( nf ) {
+		    case 1:
+			    fvd->v_4 = n1;
+			    break;
+		    case 2:
+			    fvd->v_3 = n1; fvd->v_4 = n2;
+			    break;
+		    case 3:
+			    fvd->v_2 = n1; fvd->v_3 = n2; fvd->v_4 = n3; 
+			    break;
+	    }
+    }
+
+	// Optional tail: "1.2.3.4 tail" or "1.2.3.4-tail" or +. See http://semver.org
+	// Note: in previous versions, if no tail given, existing tail was preserved.
+    size_t n = _tcscspn(arg, _T(" -+"));
     PCTSTR tail = n < _tcslen(arg) ? &arg[n] : NULL;
 	if ( tail ) {
         fvd->cFileVerTailSeparator = (char)*tail++;
 		while( *tail == _T(' ') ) tail++;
 		fvd->sFileVerTail = (*tail) ? strUnEscape(tail) : NULL;
-	}
+
+        // This is for the SemVer format: x.y.z{+-}tail
+        if (g_params.fHighMode)
+            fvd->nFileVerParts = nf;
+
+    } else {
+        fvd->sFileVerTail = NULL;
+    }
 
 	return TRUE;
 }
 
 BOOL parseProductVer( __out file_ver_data_s *fvd, PCTSTR arg )
 {
-	unsigned n1=0,n2=0,n3=0,n4=0;
-	int nf = _stscanf_s( arg, _T("%d.%d.%d.%d"), &n1, &n2, &n3, &n4);
+	unsigned n1=0, n2=0, n3=0, n4=0;
+	int nf = _stscanf_s( arg, _T("%u.%u.%u.%u"), &n1, &n2, &n3, &n4);
 
-	// if less than 4 numbers given, they are minor
-	switch( nf ) {
-		case 1:
-			fvd->pv_4 = n1;
-			break;
-		case 2:
-			fvd->pv_3 = n1; fvd->pv_4 = n2;
-			break;
-		case 3:
-			fvd->pv_2 = n1; fvd->pv_3 = n2; fvd->pv_4 = n3; 
-			break;
-		case 4:
-			fvd->pv_1 = n1; fvd->pv_2 = n2; fvd->pv_3 = n3; fvd->pv_4 = n4;
-			break;
-		default:
-			dprint("error parsing version arg\n");
-			return FALSE;
-	}
+    if ( (0 >= nf) || (4 < nf) ) {
+        dprint("error parsing product version arg\n");
+        return FALSE;
+    }
 
-	// Optional tail: "1.2.3.4 tail"
-	// If no tail found, don't replace existing.
-    size_t n = _tcscspn(arg, _T(" -"));
+    if ( 4 == nf ) {
+        fvd->pv_1 = n1; fvd->pv_2 = n2; fvd->pv_3 = n3; fvd->pv_4 = n4;
+    } else if ( g_params.fHighMode ) {
+        switch( nf ) {
+            case 1:
+                fvd->pv_1 = n1;
+                break;
+            case 2:
+                fvd->pv_1 = n1; fvd->pv_2 = n2;
+                break;
+            case 3:
+                fvd->pv_1 = n1; fvd->pv_2 = n2; fvd->pv_3 = n3; 
+                break;
+        }
+    } else {
+        // if less than 4 numbers given, they are minor
+        switch( nf ) {
+            case 1:
+                fvd->pv_4 = n1;
+                break;
+            case 2:
+                fvd->pv_3 = n1; fvd->pv_4 = n2;
+                break;
+            case 3:
+                fvd->pv_2 = n1; fvd->pv_3 = n2; fvd->pv_4 = n3; 
+                break;
+        }
+    }
+
+	// Optional tail: as above
+    size_t n = _tcscspn(arg, _T(" -+"));
     PCTSTR tail = n < _tcslen(arg) ? &arg[n] : NULL;
 	if ( tail ) {
         fvd->cProductVerTailSeparator = (char)*tail++;
 		while( *tail == _T(' ') ) tail++;
 		fvd->sProductVerTail = (*tail) ? strUnEscape(tail) : NULL;
-	}
+
+        // This is for the SemVer format: x.y.z{+-}tail
+        if (g_params.fHighMode)
+            fvd->nProductVerParts = nf;
+    } else {
+        fvd->sProductVerTail = NULL;
+    }
 
 	return TRUE;
 }
@@ -565,7 +608,7 @@ bool cmd_params::cmd_arg_parse( int argc, _TCHAR *argv[], PCTSTR *fname,
 			}
 			else if ( argmatch(_T("xlb"), ap) )  // reparse created res.desc. (self test)
 				DbgLoopbackTest = true;  //dbg 
-			else if ( argmatch(_T("sc"), ap) ) { // /sc "comment"
+			else if ( argmatch(_T("sc"), ap) ) { // same as /sc "comment"
 				ap = argv[++i];	ASSERT(ap);
 				patch_actions++;
 				if( !fvd->addTwostr( _T("Comments"), strUnEscape(ap) ) ) {
@@ -610,6 +653,10 @@ bool cmd_params::cmd_arg_parse( int argc, _TCHAR *argv[], PCTSTR *fname,
 				g_params.fClearPdbPath = true;
 				patch_actions++;
 			}
+            else if ( argmatch(_T("high"), ap) ) {
+                g_params.fHighMode = true;
+                patch_actions++;
+            }
 			else if ( argmatch(_T("va"), ap) ) { // auto generate version desc.
 				PatchMode = false;
 				patch_actions++;

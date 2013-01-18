@@ -1,7 +1,7 @@
 
 Verpatch - a tool to patch win32 version resources on .exe or .dll files,
 
-Version: 1.0.9 (21-Nov-2011)
+Version: 1.0.11 (10-Nov-2012)
 
 Verpatch is a command line tool for adding and editing the version information
 of Windows executable files (applications, DLLs, kernel drivers)
@@ -20,7 +20,7 @@ Command line syntax
 verpatch filename [version] [/options]
 
 Where
- - filename : any Windows PE file (exe, dll, sys, ocx...) that can have native resources
+ - filename : any Windows PE file (exe, dll, sys, ocx...) that can have version resource
  - version : one to four decimal numbers, separated by dots, ex.: 1.2.3.4
    Additional text can follow the numbers; see examples below. Ex.: "1.2.3.4 extra text"
 
@@ -34,13 +34,14 @@ Common Options:
 /sc "comment" - add or replace Comments string (shortcut for /s Comments "comment")
 /pv <version>   - specify Product version
     where <version> arg has same form as the file version (1.2.3.4 or "1.2.3.4 text")
-/fn - preserves Original filename, Internal name in the existing version resource of the file.
+/high - when less than 4 version numbers, these are higher numbers.
 
 
 Other options:
 
+/fn - preserves Original filename, Internal name in the existing version resource of the file.
 /langid <number> - language id for new version resource.
-     Use with /va. Default is language neutral.
+     Use with /va. Default is Language Neutral.
      <number> is combination of primary and sublanguage IDs. ENU is 1033 or 0x409.
 /vo - outputs the version info in RC format to stdout.
      This can be used with /xi to dump a version resource without modification.
@@ -52,16 +53,20 @@ Other options:
 /noed - do not check for extra data appended to exe file
 /vft2 num - specify driver subtype (VFT2_xxx value, see winver.h)
      The application type (VFT_xxx) is retained from the existing version resource of the file,
-     or filled automatically, based on the filename extension (exe->app, sys->driver, anything else->dll)
+     or filled automatically, based on the filename extension (.exe->app, .sys->driver, anything else->dll)
 
 
 Examples
 ========
 
 verpatch d:\foo.dll 1.2.33.44
-	- replaces only the file version, all 4 numbers, 
-	the Original file name and Internal name strings are set to "foo.dll".
+    - sets the file version to 1.2.33.44
+	    The Original file name and Internal name strings are set to "foo.dll".
         File foo.dll should already have a version resource (since /va not specified)
+
+verpatch d:\foo.dll 1.2.33 /high
+	- sets three higher 3 numbers of the file version. The 4th number not changed
+        File foo.dll should already have a version resource.
 
 verpatch d:\foo.dll 33.44  /s comment "a comment"
 	- replaces only two last numbers of the file version and adds a comment.
@@ -84,14 +89,11 @@ verpatch d:\foo.dll /vo /xi
 Remarks
 =======
 
-Verpatch replaces the version number in existing file version info resource
-with the values given on the command line.
-
-In "patch" mode (no /va option), the PE file should have a version resource,
-which is parsed, and then parameters specified on the command line are applied.
+In "patch" mode (no /va option), verpatch replaces the version number in existing file 
+version info resource with the values given on the command line.
+The version resource in the file  is parsed, then parameters specified on the command line are applied.
 
 If the file has no version resource, or you want to discard the existing resource, use /va switch.
-All nesessary strings can be specified with the /s option.
 
 Quotes surrounding arguments are needed for the command shell (cmd.exe), 
 for any argument that contains spaces.
@@ -104,16 +106,32 @@ See the example batch files.
 Verpatch can be run on same PE file any number of times.
 
 The Version argument can be specified as 1 to 4 dot separated decimal numbers.
-Addtional suffix can follow the version numbers, separated by a dash (-) or space.
+Additional suffix can follow the version numbers, separated by a dash (-) or space.
 If the separator is space, the whole version argument must be enclosed in quotes.
 
-If less than 4 numbers are given, they are considered as minor numbers.
+If the switch /high not specified and less than 4 numbers are given,
+they are considered as minor numbers.
 The higher version parts are retained from existing version resource.
-For example, if the existing version info has version number 1.2.3.4
+For example, if the existing version info block has version number 1.2.3.4
 and 55.66 specified on the command line, the result will be 1.2.55.66.
 
-The program ensures that the version numbers in the binary part
-of the version structure and in the string part (as text) are same.
+If the switch /high is specified and less than 4 numbers are given,
+they are considered as higher numbers.
+For example, if the existing version info has version number 1.2.3.4
+and 55.66 /high specified on the command line, the result will be 55.66.3.4.
+
+The /high switch has been added to support the "Semantic Versioning" syntax
+as described here: http://semver.org
+The "Semantic versioning", however, specifies only 3 parts for the version number,
+while Windows version numbers have 4 parts.
+Switch /high allows 3-part version numbers with optional "tail" separated by '-' or '+'
+but the text representation will not be displayed by Windows Explorer in Vista or newer.
+The file version displayed will always have 4 parts.
+
+
+Verpatch ensures that the version numbers in the binary part
+of the version structure and in the string part (as text) are same,
+or the text string begins with the same numbers as in the binary part.
 
 By default, Original File Name and Internal File Name are replaced to the actual filename.
 Use /fn to preserve existing values in the version resource.
@@ -182,20 +200,22 @@ OleSelfRegister       A     -
 AssemblyVersion       N
 
 Notes
-*1: FileVersion, ProductVersion values should begin with same 1.2.3.4 version number as in the binary header.
-Can be any text. Windows Explorer displays the version numbers from the binary header.
-Explorer of WinXP also displays File Version text in the strings box.
+*1: FileVersion, ProductVersion should not be specified with /s switch.
+See the command line parameters above.
+The string values normally begin with same 1.2.3.4 version number as in the binary header,
+but can be any text. Explorer of WinXP also displays File Version text in the strings box.
+In Win7 or newer, Explorer displays the version numbers from the binary header only.
 
-*2: The "Language" value is the name of the language code specified in the header of the string block of VS_VERSION_INFO resource.
-(or taken from VarFileInfo block?)
-It is displayed by Windows Explorer, but is not contained in the version data.
+*2: The "Language" value is the name of the language code specified in the header of the
+ string block of VS_VERSION_INFO resource (or taken from VarFileInfo block?)
+It is displayed by Windows XP Explorer.
 
 E: Displayed by Windows Explorer in Vista+
 A: Intended for some API (OleSelfRegister is used in COM object registration)
 N: Added by some .NET compilers. This version number is not contained in the
-    binary part of the version struct and can differ from the file version.
-    To change it, just use switch /s AssemblyVersion [value]
-
+   binary part of the version struct and can differ from the file version.
+   To change it, use switch /s AssemblyVersion [value]. Note: this will not
+   change the actual .NET assembly version.
 ====================================================================
 
 
@@ -208,19 +228,19 @@ Known issues and TO DO's:
 
  - Import of version resource does not work if encoded not in UTF-16.
 
- - Does not work on files signed with digital certificates (TO DO)
+ - Does not work on files signed with digital certificates (TO DO: warn and remove certificate)
 
- -  A second version resource may be added to a file
-   that already has a version resource in other language. Switch /va won't help.
+ -  A second version resource may be added to a file that already has a version resource
+   in other language. Switch /va won't help.
    TO DO: ensure that a file has only one version resource!
    
  - When verpatch is invoked from command prompt, or batch file, the string
    arguments can contain only ANSI characters, because cmd.exe batch files cannot be 
-   in Uncode format. If you need to include characters not in current locale,
-   use other shell languages that fully support Unicode (PowerShell, vbs, js).
+   in Unicode format. If you need to include characters not in current locale,
+   use other shell languages that fully support Unicode (Powershell, vbs, js).
    
  - TO DO: In RC source output (/vo), special characters in strings are not quoted;
-   so /vo may produce invalid RC input
+   so /vo may produce invalid RC input.
    
  - The parser of binary version resources handles only the most common type of structure.
    If the parser breaks because of unhandled structure format, try /va switch to
@@ -228,17 +248,34 @@ Known issues and TO DO's:
    Consider using WINE or other open source implementations?
    
  - option to add extra 0 after version strings : "string\0"
-   (tentative, requiested by a reader for some old VB code) 
+   (tentative, requested by a reader for some old VB code) 
 
- - For files with extra data, checksum is not re-calculated. Revise.
+ - For files with extra data appended, checksum is not re-calculated.
+   Such files usually implement their own integrity check.
+
+ - Switch /va does not prevent import of existing version resource. Revise.
+
+ - When existing version string contains "tail" but the command line parameter does not,
+   the tail is removed. In previous versions the tail was preserved.
+
+ - Running verpatch on certain executables (esp. built with GNU) produce corrupt file
+   when run on WinXP SP3, but same binaries give good result when run on Win7 or 2008R2.
+   (Improvement of UpdateResource API?)
 
 
 Source code 
 ============
 The source is provided as a Visual C++ 2005 project, it can be compiled with VC 2005, 2008, 2010 Express.
 It demonstrates use of the UpdateResource and imagehlp.dll API.
-It does not demonstrate use of c++, good coding manners or anything else.
-Dependencies on C++ libraries available only with the full Visual C 2008 have been removed.
+It does not demonstrate good use of C++, coding style or anything else.
+Dependencies on VC features available only in paid versions have been removed.
+
+Verpatch does not require elevation, and may not work correctly if elevated.
+Because VC 2005 does not know about requestedExecutionLevel manifest element yet,
+we add this element manually from the file "manif.txt".
+Without this fix, Windows 7 may decide (erroneously) that verpatch should run elevated.
+Ignore VC 2005 warning about the unknown manifest element.
+After upgrade to VC 2008 or later, this fix can be removed, instead just specify AsInvoker in the project settings.
 
 
 LICENSE TERMS: CPOL (CodeProject Open License)

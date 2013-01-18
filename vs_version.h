@@ -27,8 +27,12 @@ class yybuf
 	int cbwritten(void) { return m_curptr - m_startptr; }
 
 	void checkspace( int n = 8 ) { 
-		if ( cbwritten() + n > m_inisize )
-			__debugbreak();
+        if ( cbwritten() + n > m_inisize ) {
+#		ifndef NDEBUG
+		__debugbreak();
+#		endif
+		throw ":checkspace";
+        }
 	}
 
 	void pushw( WORD v ) {
@@ -75,21 +79,20 @@ class yybuf
 	//  WORD   Value[]; 
 	//};
 		WORD wValueLength = val ? (WORD)wcslen(val) : 0;
-		if (wValueLength)
-			wValueLength = (wValueLength + 1) * sizeof(WCHAR);
-		WORD wNameLength = (WORD)((wcslen(name) + 1 ) * sizeof(WCHAR));
-		ASSERT(wNameLength > sizeof(WCHAR));
+        WORD wValueSize = WORD( wValueLength ? (wValueLength + 1) * sizeof(WCHAR) : 0 );
+		WORD wNameSize = (WORD)((wcslen(name) + 1 ) * sizeof(WCHAR));
+		ASSERT(wNameSize > sizeof(WCHAR));
 
-		checkspace( wValueLength + wNameLength + 5*sizeof(WORD));
+		checkspace( wValueSize + wNameSize + 5*sizeof(WORD));
 
-		PUCHAR porig = m_curptr;
+		PWORD porig = marksize();
 		pushw(-1); //length, patch
 		pushw( wValueLength );
 		pushw( 1 ); //type
 		pushstr( name ); // with align
 		if ( wValueLength )
 			pushstr( val, false ); // don't align yet
-		*(PWORD)porig = (WORD)(m_curptr - porig);
+		patchsize(porig);
 		align4();
 	}
 
@@ -142,6 +145,14 @@ class xybuf
 			throw ":chkword";
 		m_curptr += sizeof(WORD);
 	}
+
+    // Added for compatibility with Borland (Embarcadero) C++ Builder
+    // Check version word of certain structures, which can be 0 with BC++.
+    void chkword_opt( WORD v ) {
+        if ((*(PWORD)m_curptr != v) && (*(PWORD)m_curptr != 0))
+            throw ":chkword";
+        m_curptr += sizeof(WORD);
+    }
 
 	void chkdword( DWORD v ) {
 		if (*(PDWORD)m_curptr != v)
@@ -250,10 +261,12 @@ struct file_ver_data_s {
 	UINT32 dwFileType, dwFileSubType;
 	UINT32 dwFileFlags;
 	WORD langid;			// language
-	ASTR sFileVerTail;		// sometimes used - ex. WDK samples, common.ver
+	ASTR sFileVerTail;		// suffix after file version numbers
 	ASTR sProductVerTail;	// same for product ver.
-    char cFileVerTailSeparator; // separator of version suffix: '-' or none or space
+    char cFileVerTailSeparator; // separator of version suffix: '-+' or space or 0 (none)
     char cProductVerTailSeparator; // same for product ver.
+    unsigned char nFileVerParts, nProductVerParts; // number of significant parts in version. use with /high
+
 	// Strings
 	ASTR CustomStrNames[_MAX_VER_CUSTOM_STRINGS];
 	ASTR CustomStrVals[_MAX_VER_CUSTOM_STRINGS];

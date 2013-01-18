@@ -72,6 +72,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
+				AdditionalManifestFiles="manif-vs2005.txt"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -154,6 +155,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
+				AdditionalManifestFiles="manif-vs2005.txt"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"

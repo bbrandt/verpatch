@@ -1,7 +1,7 @@
 
 Verpatch - a tool to patch win32 version resources on .exe or .dll files,
 
-Version: 1.0.11 (10-Nov-2012)
+Version: 1.0.12 (20-June-2013)
 
 Verpatch is a command line tool for adding and editing the version information
 of Windows executable files (applications, DLLs, kernel drivers)
@@ -97,7 +97,7 @@ If the file has no version resource, or you want to discard the existing resourc
 
 Quotes surrounding arguments are needed for the command shell (cmd.exe), 
 for any argument that contains spaces.
-Also other characters should be escaped (ex. &, |, and ^ for cmd.exe).
+Also, other characters should be escaped (ex. &, |, and ^ for cmd.exe).
 Null values can be specified as empty string ("").
 
 The command line can become very long, so you may want to use a batch file or script.
@@ -184,7 +184,7 @@ Attribute names are not case sensitive.
  Lang.Neutral name |note| English translation           | Aliases
 -------------------+----+-------------------------------+------------
 Comments                    Comments                      comment
-CompanyName           E     Company                       company
+CompanyName                 Company                       company
 FileDescription       E     Description                   description, desc
 FileVersion           *1    File Version
 InternalName                Internal Name                 title
@@ -225,10 +225,13 @@ Known issues and TO DO's:
 
  - Does not work on old PE files that have link version 5.x (before VC6?)
    No known workaround; this seems to be limitation of Windows UpdateResource API.
-
- - Import of version resource does not work if encoded not in UTF-16.
+   Since the UpdateResource API is part of Windows, its behaviour may differ on
+   different Windows releases. On Win7 SP1 you may get better results than on WinXP.
+   
+ - Import of version resource does not work if it is not encoded in UTF-16.
 
  - Does not work on files signed with digital certificates (TO DO: warn and remove certificate)
+   Until we do this, certificates can be removed with 3rd party delcert tool.
 
  -  A second version resource may be added to a file that already has a version resource
    in other language. Switch /va won't help.

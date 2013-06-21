@@ -314,8 +314,8 @@ BOOL ParseBinaryVersionResource(
 
 	ok = TRUE;
 
-	} catch(...) {
-		dprint("Exception in %s\n", __FUNCTION__);
+	} catch(char * error) {
+		dprint("Exception in %s: %s\n", __FUNCTION__, error);
 	}
 
 	if (!ok) dprint("Error in %s\n", __FUNCTION__);

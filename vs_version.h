@@ -79,7 +79,7 @@ class yybuf
 	//  WORD   Value[]; 
 	//};
 		WORD wValueLength = val ? (WORD)wcslen(val) : 0;
-        WORD wValueSize = WORD( wValueLength ? (wValueLength + 1) * sizeof(WCHAR) : 0 );
+        WORD wValueSize = (WORD)( wValueLength ? (wValueLength + 1) * sizeof(WCHAR) : 0 );
 		WORD wNameSize = (WORD)((wcslen(name) + 1 ) * sizeof(WCHAR));
 		ASSERT(wNameSize > sizeof(WCHAR));
 
@@ -215,11 +215,17 @@ class xybuf
 
 		wLength -= bLength;
 		nLength = wcsnlen( LPWSTR( getptr() ), wLength/sizeof(WCHAR) );
-		if ( nLength == 0 || nLength == (wLength/sizeof(WCHAR)) )
+		if ( nLength == (wLength/sizeof(WCHAR)) )
 			throw ":string val name len bad";
 		
-		*wsval = (LPCWSTR)getptr(); //should point to value
-		bLength = (nLength + 1)*sizeof(WCHAR);
+		if ( nLength == 0) {
+			// Empty value
+			*wsval = L"";
+		} else {
+			*wsval = (LPCWSTR)getptr(); //should point to value
+		}
+
+        bLength = (nLength + 1)*sizeof(WCHAR);
 		// can be padded after 0 term
 
 		m_curptr = (PUCHAR)porig + *porig;

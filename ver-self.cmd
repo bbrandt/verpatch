@@ -10,7 +10,7 @@ set _s1=%_s1% /pv "1.0.0.1-Codeplex"
 set _s2=/s private "%USERNAME%@%USERDOMAIN%"
 
 : Note: 64 is resource ID of help text, hardcoded in the program
-set _resfile=/rf #64 %~dp0\usage.txt
+set _resfile=/rf #64 "%~dp0\usage.txt"
 
 : Run a copy of verpatch on itself:
 

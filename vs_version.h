@@ -87,11 +87,14 @@ class yybuf
 
 		PWORD porig = marksize();
 		pushw(-1); //length, patch
-		pushw( wValueLength );
+        //Add extra null wchar to value to compensate for VerQueryValueA behavior
+		pushw( wValueLength + 1);
 		pushw( 1 ); //type
 		pushstr( name ); // with align
 		if ( wValueLength )
 			pushstr( val, false ); // don't align yet
+        *m_curptr++ = 0; // add 2 zero bytes
+        *m_curptr++ = 0;
 		patchsize(porig);
 		align4();
 	}

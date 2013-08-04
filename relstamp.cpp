@@ -134,7 +134,7 @@ void VerCallback1::callback( PCWSTR name, PCWSTR value )
         m_vd->langid = langid;
 
         if ( LOWORD(langcp) != 0x04B0 ) {
-            dprint("ERROR: Resource code page not Unicode(%#x). Cannot parse strings!\n", LOWORD(langcp));
+            dprint("Warning: Resource code page not Unicode(%#x). May be unable to parse strings!\n", LOWORD(langcp));
         }
 
         if ( langid != MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL) &&
@@ -395,6 +395,10 @@ BOOL updFileResources( LPCTSTR fname, __in ResDesc *ard[] )
 	if (!r2) {
 		dprint("EndUpdateResource err=%d\n", GetLastError());
 		ok = FALSE;
+		r2 = ::EndUpdateResource( rhandle, TRUE ); // discard changes
+		if (!r2) {
+			dprint("EndUpdateResource (discard) err=%d\n", GetLastError());
+		}
 	}
 
 	return ok;

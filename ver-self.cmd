@@ -3,7 +3,7 @@
 
 : Run this in Release or Debug dir.
 :
-set _ver="1.0.12.26 [%date%]"
+set _ver="1.0.14.27 [%date%]"
 set _s1=/s desc "PE version patcher tool" 
 set _s1=%_s1% /s copyright "(C) 1998-2012, pavel_a"
 set _s1=%_s1% /pv "1.0.0.1-Codeplex" 

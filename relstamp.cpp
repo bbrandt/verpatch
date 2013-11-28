@@ -612,7 +612,7 @@ bool cmd_params::cmd_arg_parse( int argc, _TCHAR *argv[], PCTSTR *fname,
 			}
 			else if ( argmatch(_T("xlb"), ap) )  // reparse created res.desc. (self test)
 				DbgLoopbackTest = true;  //dbg 
-			else if ( argmatch(_T("sc"), ap) ) { // same as /sc "comment"
+			else if ( argmatch(_T("sc"), ap) ) { // same as "/s comment"
 				ap = argv[++i];	ASSERT(ap);
 				patch_actions++;
 				if( !fvd->addTwostr( _T("Comments"), strUnEscape(ap) ) ) {
@@ -621,7 +621,7 @@ bool cmd_params::cmd_arg_parse( int argc, _TCHAR *argv[], PCTSTR *fname,
 				}
 			}
 			else if ( argmatch(_T("s"), ap) ) { 
-				//Add a string to version res: /s name "comment"
+				//Add a string to version res: "/s name value"
 				PCTSTR ns = argv[++i];	ASSERT(ns);
 				ap = argv[++i];	ASSERT(ap);
 				patch_actions++;
@@ -659,7 +659,6 @@ bool cmd_params::cmd_arg_parse( int argc, _TCHAR *argv[], PCTSTR *fname,
 			}
             else if ( argmatch(_T("high"), ap) ) {
                 g_params.fHighMode = true;
-                patch_actions++;
             }
 			else if ( argmatch(_T("va"), ap) ) { // auto generate version desc.
 				PatchMode = false;
@@ -668,8 +667,9 @@ bool cmd_params::cmd_arg_parse( int argc, _TCHAR *argv[], PCTSTR *fname,
 			else if ( argmatch(_T("rf"), ap) ) {
 				// Add a resource from file: /rf #<number> filename
 				// For now, use numeric ids only. High 16 bits can be used for type, etc.
-				ULONG res_id = 0;
+                patch_actions++;
 				ap = argv[++i];	ASSERT(ap);
+				ULONG res_id = 0;
 				if ( *ap++ != _T('#') || 0 == (res_id = _tcstoul( ap, NULL, 16 )) ) {
 					dtprint(_T("Resource id must be #hex_number\n"), ap);
 					return false;
@@ -723,7 +723,7 @@ bool cmd_params::cmd_arg_parse( int argc, _TCHAR *argv[], PCTSTR *fname,
 	}
 
 	if ( 0 == patch_actions )
-		DbgImportOnly = true; //dbg
+		DbgImportOnly = true; // read only, do not modify
 
 	// flags: SpecialBuild fVerBeta fVerDebug?
 

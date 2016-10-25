@@ -124,14 +124,23 @@ BOOL makeVersionResource( __in file_ver_data_s const * fvd, __out PUCHAR *retp )
 			hr = ::StringCbCatW(&temps[0], sizeof(temps), fvd->sProductVerTail);
 			if ( !SUCCEEDED(hr) ) temps[0] = 0;
 		}
-		vbuf.pushTwostr( L"ProductVersion", &temps[0] );
 
+		if (fvd->sProductVerOverride)
+		{
+			d2print("Overriding Product version:[%ws]\n", fvd->sProductVerOverride);
+			vbuf.pushTwostr(L"ProductVersion", fvd->sProductVerOverride);
+		}
+		else
+		{
+			vbuf.pushTwostr(L"ProductVersion", &temps[0]);
+		}
+	
 		// Strings
 		for ( int k = 0; k < ARRAYSIZE(fvd->CustomStrNames); k++ ) {
 			if ( fvd->CustomStrNames[k] != NULL ) {
 
 				vbuf.pushTwostr( fvd->CustomStrNames[k], fvd->CustomStrVals[k] );
-				
+
 				if ( 0 == _wcsicmp( L"SpecialBuild", fvd->CustomStrNames[k] ) )
 					fxi->dwFileFlags |= VS_FF_SPECIALBUILD;
 				if ( 0 == _wcsicmp( L"PrivateBuild",fvd->CustomStrNames[k] ) )

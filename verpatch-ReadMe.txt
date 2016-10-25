@@ -1,7 +1,7 @@
 
 Verpatch - a tool to patch win32 version resources on .exe or .dll files,
 
-Version: 1.0.14 (25-Oct-2016)
+Version: 1.0.15 (25-Oct-2016)
 
 Verpatch is a command line tool for adding and editing the version information
 of Windows executable files (applications, DLLs, kernel drivers)
@@ -86,7 +86,37 @@ verpatch d:\foo.dll "1.2.33.44" /va /s description "foo.dll"
 verpatch d:\foo.dll /vo /xi
     - dumps the version resource in RC format, does not update the file.
 
+Misc. functions
+================
 
+* Add resource from a file
+
+The /rf switch adds a resource from a file, or replaces a resource with same type and id.
+
+The argument "#id" is a 32-bit hex number, prefixed with #.
+Low 16 bits of this value are resource id; can not be 0.
+Next 8 bits are resource type: one of RT_xxx symbols in winuser.h, or user defined.
+If the type value is 0, RT_RCDATA (10) is assumed.
+High 8 bits of the #id arg are reserved0.
+The language code of resources added by this switch is 0 (Neutral).
+Named resource types and ids are not implemented.
+The file is added as opaque binary chunk; the resource size is rounded up to 4 bytes
+and padded with zero bytes.
+
+* Handling appended data
+
+The program detects extra data appended to executable files, saves it and appends 
+again after modifying resources.
+Command switch /noed disables checking for extra data.
+
+Such extra data is used by some installers, self-extracting archives and other applications.
+However, the way we restore the data may be not compatible with these applications.
+Please, verify that executable files that contain extra data work correctly after modification.
+Make backup of valuable files before modification.
+
+* Remove the path from debug info (.PDB) string
+
+Use switch /rpdb to remove the path to the .pdb file in debug information; leave only file name.
     
 Remarks
 =======
@@ -149,31 +179,6 @@ String arguments for File version and Product version parameters are handled
  - The Product version can be specified using /pv switch
 
 
-Misc. functions
-================
-
-The /rf switch adds a resource from a file, or replaces a resource with same type and id.
-
-The argument "#id" is a 32-bit hex number, prefixed with #.
-Low 16 bits of this value are resource id; can not be 0.
-Next 8 bits are resource type: one of RT_xxx symbols in winuser.h, or user defined.
-If the type value is 0, RT_RCDATA (10) is assumed.
-High 8 bits of the #id arg are reserved0.
-The language code of resources added by this switch is 0 (Neutral).
-Named resource types and ids are not implemented.
-The file is added as opaque binary chunk; the resource size is rounded up to 4 bytes
-and padded with zero bytes.
-
-The program detects extra data appended to executable files, saves it and appends 
-again after modifying resources.
-Command switch /noed disables checking for extra data.
-
-Such extra data is used by some installers, self-extracting archives and other applications.
-However, the way we restore the data may be not compatible with these applications.
-Please, verify that executable files that contain extra data work correctly after modification.
-Make backup of valuable files before modification.
-
-
 ====================================================================
 Known string keys in VS_VERSION_INFO resource
 ====================================================================
@@ -195,7 +200,7 @@ LegalCopyright        E     Copyright                     copyright, (c)
 LegalTrademarks       E     Legal Trademarks              tm, (tm)
 OriginalFilename            Original File Name
 ProductName                 Product Name                  product
-ProductVersion        *1    Product Version               pv, productversion, productver, prodver
+ProductVersion        *3    Product Version               productversion (*)
 PrivateBuild                Private Build Description     pb, private
 SpecialBuild                Special Build  Description    sb, build
 OleSelfRegister       A     - 
@@ -211,6 +216,10 @@ In Win7 or newer, Explorer displays the version numbers from the binary header o
 *2: The "Language" value is the name of the language code specified in the header of the
  string block of VS_VERSION_INFO resource (or taken from VarFileInfo block?)
 It is displayed by Windows XP Explorer.
+
+*3 When Productversion is specified as a string attribute (/s productversion)
+   rather than with /pv, the argument string will be put literally.
+   This can be used to specify leading zeros in version numbers. 
 
 E: Displayed by Windows Explorer in Vista+
 A: Intended for some API (OleSelfRegister is used in COM object registration)
@@ -270,11 +279,11 @@ Known issues and TO DO's:
 
 Source code 
 ============
-The source is provided as a Visual C++ 2010 project, it can be compiled with VC 2008, 2010, 2012 Express.
-(The VC 2008 compatible project is in verpatch(vs2008).sln, verpatch.vcproj files. verpatch.sln, .vcxproj are for VC++ 2010).
+The source is provided as a Visual C++ 2013 project, it can be compiled with VC 2008, 2010, 2012 Express and newer.
+(The VC 2008 compatible project is in verpatch(vs2008).sln, verpatch.vcproj files. verpatch.sln, .vcxproj are for VC++ 2013).
 It demonstrates use of the UpdateResource and imagehlp.dll API.
 It does not demonstrate good use of C++, coding style or anything else.
-Dependencies on VC features available only in paid versions have been removed.
+Dependencies on VC features available only in paid versions (before Community editions) have been removed.
 
 UAC note: Verpatch does not require any administrator rights and may not work correctly if run elevated.
 

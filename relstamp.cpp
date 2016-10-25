@@ -558,8 +558,9 @@ LPCTSTR aliasToStringKey( LPCTSTR key )
 	}
 
     if ( 0 == _tcsicmp(key, _T("productversion"))) {
-        dprint("do NOT use ProductVersion with /s option, use /pv\n");
-        return NULL;
+        // When specified as string instead of /pv, use the specified string literally.
+        dprint("Warning: ProductVersion with /s option used for special formatting, normally use /pv\n");
+        return _T("ProductVersion");
     }
 
 	if ( 0 == _tcsicmp(key, _T("language"))) {
@@ -627,8 +628,11 @@ bool cmd_params::cmd_arg_parse( int argc, _TCHAR *argv[], PCTSTR *fname,
 				PCTSTR ns = argv[++i];	ASSERT(ns);
 				ap = argv[++i];	ASSERT(ap);
 				patch_actions++;
-
-				if( !fvd->addTwostr( aliasToStringKey(ns), strUnEscape(ap) ) ) {
+				if (argmatch(_T("ProductVersion"), aliasToStringKey(ns))) {
+					// When specified as string instead of /pv, use the specified string literally.
+					fvd->sProductVerOverride = strUnEscape(ap);
+				}
+				else if( !fvd->addTwostr( aliasToStringKey(ns), strUnEscape(ap) ) ) {
 					dtprint(_T("Error adding string:[%s]\n"), ap);
 					return false;
 				}
@@ -915,7 +919,6 @@ void showUsage()
 #else
 void showUsage()
 {
-	dprint("verpatch r9 (2011/11/21)\n");
 	dprint("Usage: verpatch filename [version] [/options]\n");
 	dprint("\nOptions:\n");
 	dprint(" /s name \"value\"\t- add/replace any version resource string\n"); // todo: escapes

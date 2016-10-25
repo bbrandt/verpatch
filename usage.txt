@@ -1,4 +1,4 @@
-verpatch 1.0.15.00 (Oct 2016)
+verpatch 1.0.15.1 (Oct 2016)
 Usage: verpatch filename [version] [/options]
 Options:
  /va - create the version resource. Use when the file has no version info.
@@ -27,5 +27,4 @@ Examples:
 Alternative attribute names to use with /s (see documentation for details):
   comment company description|desc InternalName|title
   copyright|(c) LegalTrademarks|tm|(tm) ProductName|product
-  productversion|productver|prodver|pv
   PrivateBuild|private|pb  SpecialBuild|build|sb

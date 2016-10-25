@@ -12,7 +12,7 @@
 
 #if ( 1 && !defined(DEF_COMPANY_NAME) )
 #define DEF_COMPANY_NAME	_T(" ")
-#define DEF_COPYRGT			_T("Copyright (c) 2009")
+#define DEF_COPYRGT			_T("Copyright (c) 2016")
 #define DEF_PRODUCT_NAME	_T(" ")
 #endif
 

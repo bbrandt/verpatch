@@ -274,7 +274,7 @@ struct file_ver_data_s {
 	ASTR sProductVerTail;	// same for product ver.
     char cFileVerTailSeparator; // separator of version suffix: '-+' or space or 0 (none)
     char cProductVerTailSeparator; // same for product ver.
-    unsigned char nFileVerParts, nProductVerParts; // number of significant parts in version. use with /high
+    USHORT nFileVerParts, nProductVerParts; // number of significant parts in version. use with /high
 
 	// Strings
 	ASTR CustomStrNames[_MAX_VER_CUSTOM_STRINGS];

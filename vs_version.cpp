@@ -108,7 +108,7 @@ BOOL makeVersionResource( __in file_ver_data_s const * fvd, __out PUCHAR *retp )
                 break;
             case 3:
                 hr = ::StringCbPrintfW( &temps[0], sizeof(temps), L"%u.%u.%u",
-                    fvd->pv_1, fvd->pv_2, fvd->pv_3, fvd->pv_4 );
+                    fvd->pv_1, fvd->pv_2, fvd->pv_3);
                 break;
             default:
 		        hr = ::StringCbPrintfW( &temps[0], sizeof(temps), L"%u.%u.%u.%u",

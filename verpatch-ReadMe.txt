@@ -1,7 +1,7 @@
 
 Verpatch - a tool to patch win32 version resources on .exe or .dll files,
 
-Version: 1.0.14 (04-Aug-2013)
+Version: 1.0.14 (25-Oct-2016)
 
 Verpatch is a command line tool for adding and editing the version information
 of Windows executable files (applications, DLLs, kernel drivers)
@@ -35,7 +35,7 @@ Common Options:
 /pv <version>   - specify Product version
     where <version> arg has same form as the file version (1.2.3.4 or "1.2.3.4 text")
 /high - when less than 4 version numbers, these are higher numbers.
-
+      The string representation will have as many components as specified.
 
 Other options:
 
@@ -60,16 +60,18 @@ Examples
 ========
 
 verpatch d:\foo.dll 1.2.33.44
-    - sets the file version to 1.2.33.44
-        The Original file name and Internal name strings are set to "foo.dll".
-        File foo.dll should already have a version resource (since /va not specified)
+    - Sets the file version to 1.2.33.44
+      The Original file name and Internal name strings are set to "foo.dll".
+      File foo.dll should already have a version resource (since /va not specified)
 
 verpatch d:\foo.dll 1.2.33 /high
-    - sets three higher 3 numbers of the file version. The 4th number not changed
-        File foo.dll should already have a version resource.
+    - Sets three higher 3 numbers of the file version. 
+	  The 4th number is not changed in the binary version struct,
+	  and the version as string will have three components.
+      File foo.dll should already have a version resource.
 
 verpatch d:\foo.dll 33.44  /s comment "a comment"
-    - replaces only two last numbers of the file version and adds a comment.
+    - Replaces only two last numbers of the file version and adds a comment.
         File foo.dll should already have a version resource.
 
 verpatch d:\foo.dll "33.44 special release" /pv 1.2.3.4

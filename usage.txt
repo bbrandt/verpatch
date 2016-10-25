@@ -1,4 +1,4 @@
-verpatch 1.0.14.27 (Aug 2013)
+verpatch 1.0.15.00 (Oct 2016)
 Usage: verpatch filename [version] [/options]
 Options:
  /va - create the version resource. Use when the file has no version info.
@@ -11,9 +11,9 @@ Options:
  /xi - test mode, does not modify the file
  /vft2 num - specify driver type (one of VFT2_ values defined in winver.h)
  /rpdb - remove path to .pdb in debug information
- /rf #hex-id file - add a raw binary resource from file (see readme)
- /noed - discard any extra data attached at the end of file
- /sc "comment" - same as /s comment "comment"
+ /rf #hex-id file - add a raw binary resource from file (see the readme)
+ /noed - discard any extra data appended at the end of file
+ /sc "comment" - same as /s comment "comment string"
  /langid <number> - language id for new version resource; use with /va. Default=LN.
  /high - interpret less than 4 version parts as higher numbers
 

@@ -258,6 +258,7 @@ BOOL parseFileVer( __out file_ver_data_s *fvd, PCTSTR arg )
                 fvd->v_1 = n1; fvd->v_2 = n2; fvd->v_3 = n3; 
                 break;
         }
+		fvd->nFileVerParts = nf;
     } else {
         // if less than 4 numbers given, they are minor
 	    switch( nf ) {
@@ -317,6 +318,7 @@ BOOL parseProductVer( __out file_ver_data_s *fvd, PCTSTR arg )
                 fvd->pv_1 = n1; fvd->pv_2 = n2; fvd->pv_3 = n3; 
                 break;
         }
+		fvd->nProductVerParts = nf;
     } else {
         // if less than 4 numbers given, they are minor
         switch( nf ) {
